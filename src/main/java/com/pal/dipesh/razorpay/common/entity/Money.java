@@ -3,8 +3,7 @@ package com.pal.dipesh.razorpay.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 
 /**
  * Immutable monetary value stored as integer minor units (e.g. paise for INR)
@@ -20,7 +19,9 @@ import lombok.Getter;
  * the protected no-arg constructor exists only for JPA.
  */
 @Getter
+@Setter
 @Embeddable
+@NoArgsConstructor
 @EqualsAndHashCode
 public class Money {
     @Column(name = "amount_units", nullable = false)
@@ -28,9 +29,6 @@ public class Money {
 
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
-
-    protected Money() {
-    }
 
     private Money(int amountUnits, String currency) {
         this.amountUnits = amountUnits;

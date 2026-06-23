@@ -44,6 +44,9 @@ public class OrderRecord extends BaseAuditEntity {
     @Embedded
     private Money amount;
 
+    @Column(name = "receipt", length = 100)
+    private String receipt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status", nullable = false, length = 20)
     private OrderStatus orderStatus;

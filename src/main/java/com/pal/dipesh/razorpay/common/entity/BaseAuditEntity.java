@@ -15,6 +15,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import com.pal.dipesh.razorpay.common.config.JpaAuditingConfig;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ import java.util.UUID;
  *
  * <p>All four fields are populated by Spring Data JPA Auditing via
  * {@link AuditingEntityListener}. Auditing is enabled application-wide in
- * {@code JpaAuditingConfig}.
+ * {@link JpaAuditingConfig}.
  *
  * <h2>Renaming an inherited column in a child entity</h2>
  * Use {@link jakarta.persistence.AttributeOverride} on the child class to

@@ -31,6 +31,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "api_key")
@@ -50,16 +51,20 @@ public class ApiKey {
     @Column(name = "key_id", nullable = false, length = 50)
     private String keyId;
 
+    @Column(name = "previous_key_secret_hash", length = 200)
+    private String previousKeySecretHash;
+
     @Column(name = "key_secret_hash", nullable = false, length = 200)
     private String keySecretHash;
 
-    @Column(name = "web_hook_secret_hash", nullable = false, length = 200)
+    @Column(name = "web_hook_secret_hash", length = 200)
     private String webHookSecretHash;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "environment", nullable = false, length = 10)
     private Environment environment;
 
+    @Builder.Default
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
