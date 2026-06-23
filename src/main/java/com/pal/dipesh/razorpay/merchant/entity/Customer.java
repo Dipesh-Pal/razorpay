@@ -21,7 +21,13 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "customer")
+@Table(
+        name = "customer",
+        indexes = {
+                @Index(name = "idx_customer_merchant_id", columnList = "merchant_id"),
+                @Index(name = "idx_customer_merchant_email", columnList = "merchant_id, email")
+        }
+)
 @EqualsAndHashCode(callSuper = true)
 public class Customer extends BaseAuditEntity {
 

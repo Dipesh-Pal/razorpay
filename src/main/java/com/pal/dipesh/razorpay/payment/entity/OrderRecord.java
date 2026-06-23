@@ -34,7 +34,14 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "order_record")
+@Table(
+        name = "order_record",
+        indexes = {
+                @Index(name = "idx_order_merchant_id", columnList = "merchant_id"),
+                @Index(name = "idx_order_status_expires_at", columnList = "order_status, expires_at"),
+                @Index(name = "idx_order_merchant_receipt", columnList = "merchant_id, receipt", unique = true)
+        }
+)
 @EqualsAndHashCode(callSuper = true)
 public class OrderRecord extends BaseAuditEntity {
 

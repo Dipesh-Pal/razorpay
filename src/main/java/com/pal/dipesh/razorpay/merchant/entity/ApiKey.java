@@ -34,7 +34,13 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "api_key")
+@Table(
+        name = "api_key",
+        indexes = {
+                @Index(name = "idx_api_key_merchant_id_enabled", columnList = "merchant_id, enabled"),
+                @Index(name = "idx_api_key_key_id", columnList = "key_id", unique = true)
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class ApiKey {

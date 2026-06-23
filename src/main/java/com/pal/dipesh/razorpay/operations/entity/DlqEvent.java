@@ -28,7 +28,13 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "dlq_event")
+@Table(
+        name = "dlq_event",
+        indexes = {
+                @Index(name = "idx_dlq_event_webhook_event_id", columnList = "webhook_event_id", unique = true),
+                @Index(name = "idx_dlq_event_merchant_id", columnList = "merchant_id")
+        }
+)
 @EqualsAndHashCode(of = "id")
 public class DlqEvent {
 

@@ -20,7 +20,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@Table(name = "settlement_payment")
+@Table(
+        name = "settlement_payment",
+        indexes = {
+                @Index(name = "idx_settlement_payment_payment_id", columnList = "payment_id")
+        }
+)
 public class SettlementPayment {
 
     @EmbeddedId

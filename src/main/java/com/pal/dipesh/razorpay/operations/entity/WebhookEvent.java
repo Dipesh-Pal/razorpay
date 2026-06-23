@@ -37,7 +37,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@Table(name = "webhook_event")
+@Table(
+        name = "webhook_event",
+        indexes = {
+                @Index(name = "idx_webhook_event_merchant_id_event_type", columnList = "merchant_id, event_type"),
+                @Index(name = "idx_webhook_event_status_next_retry_at", columnList = "status, next_retry_at")
+        }
+)
 @EntityListeners(AuditingEntityListener.class)
 public class WebhookEvent {
 

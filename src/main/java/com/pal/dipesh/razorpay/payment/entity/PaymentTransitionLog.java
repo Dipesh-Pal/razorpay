@@ -28,8 +28,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@Table(name = "payment_transition_log")
+@Table(
+        name = "payment_transition_log",
+        indexes = {
+                @Index(name = "idx_ptl_payment_id", columnList = "payment_id"),
+                @Index(name = "idx_ptl_occurred_at", columnList = "occurred_at")
+        }
+)
 public class PaymentTransitionLog {
+
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.UUID)

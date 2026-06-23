@@ -38,7 +38,15 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "payment")
+@Table(
+        name = "payment",
+        indexes = {
+                @Index(name = "idx_payment_order_id", columnList = "order_id"),
+                @Index(name = "idx_payment_merchant_id", columnList = "merchant_id"),
+                @Index(name = "idx_payment_status", columnList = "status"),
+                @Index(name = "idx_payment_merchant_idempotency_key", columnList = "merchant_id, idempotency_key", unique = true)
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class Payment {
@@ -76,6 +84,9 @@ public class Payment {
 
 	@Column(name = "bank_reference", length = 120)
 	private String bankReference;
+
+	@Column(name = "processor_reference", length = 120)
+	private String processorReference;
 
 	@Column(name = "error_code", length = 80)
 	private String errorCode;

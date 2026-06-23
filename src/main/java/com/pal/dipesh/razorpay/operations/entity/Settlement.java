@@ -34,7 +34,13 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "settlement")
+@Table(
+        name = "settlement",
+        indexes = {
+                @Index(name = "idx_settlement_merchant_id_created_at", columnList = "merchant_id, created_at"),
+                @Index(name = "idx_settlement_status", columnList = "status")
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class Settlement {

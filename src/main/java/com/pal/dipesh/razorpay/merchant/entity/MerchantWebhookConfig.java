@@ -21,7 +21,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "merchant_webhook_config")
+@Table(
+        name = "merchant_webhook_config",
+        indexes = {
+                @Index(name = "idx_mwc_merchant_id_enabled", columnList = "merchant_id, enabled")
+        }
+)
 public class MerchantWebhookConfig extends BaseAuditEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

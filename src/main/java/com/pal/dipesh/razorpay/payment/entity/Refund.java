@@ -35,7 +35,14 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "refund")
+@Table(
+        name = "refund",
+        indexes = {
+                @Index(name = "idx_refund_payment_id", columnList = "payment_id"),
+                @Index(name = "idx_refund_merchant_id", columnList = "merchant_id"),
+                @Index(name = "idx_refund_status", columnList = "status")
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class Refund {

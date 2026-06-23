@@ -31,7 +31,14 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "card_token")
+@Table(
+        name = "card_token",
+        indexes = {
+                @Index(name = "idx_card_token_vault_card_id", columnList = "vault_card_id"),
+                @Index(name = "idx_card_token_customer_id", columnList = "customer_id"),
+                @Index(name = "idx_card_token_merchant_id", columnList = "merchant_id")
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class CardToken {

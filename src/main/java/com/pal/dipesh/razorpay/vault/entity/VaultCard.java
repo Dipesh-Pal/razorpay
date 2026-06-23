@@ -30,7 +30,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "vault_card")
+@Table(
+        name = "vault_card",
+        indexes = {
+                @Index(name = "idx_vault_card_bin_last_four", columnList = "bin, last_four")
+        }
+)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class VaultCard {
