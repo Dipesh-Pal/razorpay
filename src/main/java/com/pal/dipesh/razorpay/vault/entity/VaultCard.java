@@ -1,5 +1,7 @@
 package com.pal.dipesh.razorpay.vault.entity;
 
+import com.pal.dipesh.razorpay.common.enums.CardBrand;
+
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -58,7 +60,8 @@ public class VaultCard {
     private byte[] encryptedDek;
 
     @Column(name = "brand", nullable = false, length = 50)
-    private String brand;
+    @Enumerated(EnumType.STRING)
+    private CardBrand brand;
 
     @Column(name = "card_holder_name", nullable = false, length = 200)
     private String cardHolderName;

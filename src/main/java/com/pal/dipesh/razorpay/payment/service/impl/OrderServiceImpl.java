@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(UUID merchantId, OrderCreateRequest request) {
         if(request.receipt() != null && orderRepository.existsByMerchantIdAndReceipt(merchantId, request.receipt())) {
             log.warn("Order with receipt {} already exists for merchant {}", request.receipt(), merchantId);
-            throw new DuplicateResourceException("ORDER_RECEIPT_DUPLICATE", "Order with receipt " + request.receipt() + " already exists for merchant " + merchantId);
+            throw new DuplicateResourceException("DUPLICATE_ORDER_RECEIPT", "Order with receipt " + request.receipt() + " already exists for merchant " + merchantId);
         }
 
         OrderRecord newOrder = OrderRecord
@@ -68,7 +68,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getOrderById(UUID merchantId, UUID orderId) {
         OrderRecord order = orderRepository.findByIdAndMerchantId(orderId, merchantId)
-                .orElseThrow(() -> new ResourceNotFoundException("order", orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order with id {} not found for merchant {}", orderId, merchantId);
+                    return new ResourceNotFoundException("order", orderId);
+                });
 
         return orderMapper.toOrderResponse(order);
     }
@@ -77,7 +80,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse cancelOrder(UUID merchantId, UUID orderId) {
         OrderRecord order = orderRepository.findByIdAndMerchantId(orderId, merchantId)
-                .orElseThrow(() -> new ResourceNotFoundException("order", orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order with id {} not found for merchant {}", orderId, merchantId);
+                    return new ResourceNotFoundException("order", orderId);
+                });
 
         if(order.getOrderStatus() == OrderStatus.CANCELLED) {
             log.warn("Order {} is already cancelled", orderId);
@@ -98,7 +104,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<PaymentResponse> listPayments(UUID merchantId, UUID orderId) {
         OrderRecord order = orderRepository.findByIdAndMerchantId(orderId, merchantId)
-                .orElseThrow(() -> new ResourceNotFoundException("order", orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order with id {} not found for merchant {}", orderId, merchantId);
+                    return new ResourceNotFoundException("order", orderId);
+                });
 
         List<Payment> paymentList = paymentRepository.findByOrderRecord_Id(orderId).orElse(List.of());
 

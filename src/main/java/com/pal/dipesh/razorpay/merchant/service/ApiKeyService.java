@@ -5,7 +5,6 @@ import com.pal.dipesh.razorpay.merchant.dto.response.ApiKeyCreateResponse;
 import com.pal.dipesh.razorpay.merchant.dto.response.ApiKeyResponse;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ApiKeyService {

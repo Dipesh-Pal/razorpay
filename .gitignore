@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secret Keys ###
+*.pem
+*.key
+*.p12
+*.jks
+.env

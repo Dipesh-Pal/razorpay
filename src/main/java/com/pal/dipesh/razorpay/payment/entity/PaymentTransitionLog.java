@@ -62,8 +62,8 @@ public class PaymentTransitionLog {
     @Column (name = "actor", length = 100)
     private PaymentActor actor;
 
-    @Column(name = "reason")
-    private String reason;
+//    @Column(name = "reason")
+//    private String reason;
 
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;

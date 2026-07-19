@@ -11,17 +11,17 @@ import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PaymentResponse(
-    UUID id,
-    UUID orderId,
-    UUID merchantId,
-    Money amount,
-    PaymentStatus status,
-    PaymentMethod method,
-    Map<String, Object> methodDetails,
-    String bankReference,
-    String errorCode,
-    String errorDescription,
-    LocalDateTime capturedAt,
-    LocalDateTime createdAt
+        UUID id,
+        UUID orderId,
+        UUID merchantId,
+        Money amount,
+        PaymentStatus status,
+        PaymentMethod method,
+        Map<String, Object> methodDetails,
+        String bankReference,
+        String errorCode,
+        String errorDescription,
+        LocalDateTime capturedAt,
+        LocalDateTime createdAt
 ) {
 }

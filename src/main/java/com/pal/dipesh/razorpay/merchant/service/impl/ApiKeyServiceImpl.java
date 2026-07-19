@@ -16,6 +16,7 @@ import com.pal.dipesh.razorpay.merchant.service.ApiKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +32,16 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private final PasswordEncoder passwordEncoder;
     private final ApiKeyMapper apiKeyMapper;
 
     @Override
     @Transactional
     public ApiKeyCreateResponse createApiKey(UUID merchantId, ApiKeyCreateRequest request) {
-        Merchant merchant = merchantRepository.findById(merchantId).orElseThrow(() -> new ResourceNotFoundException("merchant", merchantId));
+        Merchant merchant = merchantRepository.findById(merchantId).orElseThrow(() -> {
+            log.warn("Merchant with id {} not found", merchantId);
+            return new ResourceNotFoundException("merchant", merchantId);
+        });
 
         String apiKeyId = "rzp_" + request.environment().name().toLowerCase() + "_" + RandomizerUtil.randomBase64(24);
         String rawSecret = RandomizerUtil.randomBase64(48);
@@ -44,7 +49,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         ApiKey apiKey = ApiKey.builder()
                 .merchant(merchant)
                 .keyId(apiKeyId)
-                .keySecretHash(rawSecret) // TODO: encrypt using Bcrypt
+                .keySecretHash(passwordEncoder.encode(rawSecret))
                 .environment(request.environment())
                 .build();
 
@@ -55,11 +60,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public List<ApiKeyResponse> listByMerchantId(UUID merchantId) {
-        return apiKeyMapper.toApiKeyResponse(
-                apiKeyRepository
-                        .findByMerchant_Id(merchantId)
-                        .orElseThrow(() -> new ResourceNotFoundException("merchant", merchantId))
-        );
+        List<ApiKey> apiKeys = apiKeyRepository.findByMerchant_Id(merchantId).orElse(List.of());
+        return apiKeys.isEmpty() ? List.of() : apiKeyMapper.toApiKeyResponse(apiKeys);
     }
 
     @Override
@@ -70,7 +72,10 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 //                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", keyId));
 
         ApiKey apiKey = apiKeyRepository.findByKeyIdAndMerchant_Id(keyId, merchantId)
-                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", keyId));
+                .orElseThrow(() -> {
+                    log.warn("Api key with keyId {} not found for merchant {}", keyId, merchantId);
+                    return new ResourceNotFoundException("ApiKey", keyId);
+                });
 
         apiKey.setEnabled(false);
         apiKey.setRevokedAt(LocalDateTime.now());
@@ -83,7 +88,10 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     @Transactional
     public ApiKeyCreateResponse rotateKey(UUID merchantId, String keyId) {
         ApiKey apiKey = apiKeyRepository.findByKeyIdAndMerchant_Id(keyId, merchantId)
-                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", keyId));
+                .orElseThrow(() -> {
+                    log.warn("ApiKey with keyId {} not found for merchant {}", keyId, merchantId);
+                    return new ResourceNotFoundException("ApiKey", keyId);
+                });
 
         if(!apiKey.isEnabled()){
            throw new ApiKeyDisabledException("API_KEY_DISABLED", "API key with id " + keyId + " is disabled and cannot be rotated");
@@ -91,7 +99,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         String newRawSecret = RandomizerUtil.randomBase64(40);
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
-        apiKey.setKeySecretHash(newRawSecret); // TODO: encrypt using Bcrypt
+        apiKey.setKeySecretHash(passwordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setRotatedBy("system"); // TODO: set actual user who rotated the key
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24)); // 24 hours grace period for old key to work

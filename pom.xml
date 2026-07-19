@@ -7,21 +7,34 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.6</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 
 	<groupId>com.pal.dipesh</groupId>
 	<artifactId>razorpay</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name/>
+
 	<description/>
+
 	<url/>
+
 	<licenses>
 		<license/>
 	</licenses>
+
 	<developers>
-		<developer/>
+		<developer>
+			<name>Dipesh Pal</name>
+			<email>me.dipesh.pal@gmail.com</email>
+			<roles>
+				<role>Backend Developper</role>
+			</roles>
+			<timezone>Asia/Kolkata</timezone>
+		</developer>
 	</developers>
+
 	<scm>
 		<connection/>
 		<developerConnection/>
@@ -31,6 +44,7 @@
 
 	<properties>
 		<java.version>25</java.version>
+		<jjwt.version>0.12.6</jjwt.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 	</properties>
@@ -46,11 +60,34 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
 		</dependency>
 
 		<dependency>

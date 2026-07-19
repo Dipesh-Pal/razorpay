@@ -1,5 +1,7 @@
 package com.pal.dipesh.razorpay.payment.controller;
 
+import com.pal.dipesh.razorpay.common.annotation.ResponseMessage;
+import com.pal.dipesh.razorpay.merchant.security.MerchantContext;
 import com.pal.dipesh.razorpay.payment.dto.request.OrderCreateRequest;
 import com.pal.dipesh.razorpay.payment.dto.response.OrderResponse;
 import com.pal.dipesh.razorpay.payment.service.OrderService;
@@ -22,13 +24,14 @@ import java.util.UUID;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
+    private final MerchantContext merchantContext;
     private final OrderService orderService;
-    UUID merchantId = UUID.fromString("b8ff9c28-3114-4296-a406-8f8a5d42661b"); // TODO: Replace with MerchantContext
 
     @PostMapping
+    @ResponseMessage("Order created")
     public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderCreateRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(orderService.createOrder(merchantId, request));
+                .body(orderService.createOrder(merchantContext.getMerchantId(), request));
     }
 }

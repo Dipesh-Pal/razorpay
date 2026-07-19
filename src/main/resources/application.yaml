@@ -2,10 +2,6 @@ spring:
   application:
     name: razorpay
 
-  jackson:
-    mapper:
-      accept-case-insensitive-enums: true
-
   datasource:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
@@ -22,3 +18,42 @@ spring:
         format_sql: true
         jdbc:
           time_zone: Asia/Kolkata
+
+app:
+  vault:
+    master-key: ${PAYMENT_MASTER_KEY}
+
+  security:
+    jwt:
+      private-key: ${JWT_PRIVATE_KEY}
+      public-key: ${JWT_PUBLIC_KEY}
+      passphrase: ${JWT_KEY_PASSPHRASE}
+      access-token-expiry-ms: 900000      # 15 minutes — PCI-DSS recommends short-lived
+      refresh-token-expiry-ms: 86400000   # 24 hours
+      issuer: ${spring.application.name}
+
+    cookie:
+      path: /api/v1/auth                  # cookie only sent to auth endpoints (refresh, logout)
+      same-site: Strict                   # blocks browser CSRF for cookie-bearing requests
+      secure: ${COOKIE_SECURE:true}       # must be true in prod; override to false only for local http dev
+
+payment:
+  order:
+    default-expiry-minutes: 30
+
+  simulator:
+    poll-interval-ms: 5000
+    chaos-mode: NORMAL
+    method:
+      CARD:
+        min-delay-seconds: 2
+        max-delay-seconds: 6
+        success-rate: 90
+      UPI:
+        min-delay-seconds: 1
+        max-delay-seconds: 3
+        success-rate: 95
+      NET_BANKING:
+        min-delay-seconds: 4
+        max-delay-seconds: 10
+        success-rate: 80
