@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface PaymentService {
     PaymentResponse initiate(UUID merchantId, PaymentInitiateRequest request);
+
     PaymentResponse capture(UUID merchantId, UUID paymentId);
+
     void resolveAuthorization(UUID paymentId, boolean approve, String bankRef, String errorCode, String errorDescription);
 }

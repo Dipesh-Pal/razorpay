@@ -1,5 +1,10 @@
 package com.pal.dipesh.razorpay.merchant.security.filters;
 
+import com.pal.dipesh.razorpay.common.exception.RateLimitExceededException;
+import com.pal.dipesh.razorpay.common.ratelimit.RateLimitResult;
+import com.pal.dipesh.razorpay.common.ratelimit.RateLimiter;
+import com.pal.dipesh.razorpay.merchant.cache.ApiKeyCache;
+import com.pal.dipesh.razorpay.merchant.cache.ApiKeyCacheEntry;
 import com.pal.dipesh.razorpay.merchant.entity.ApiKey;
 import com.pal.dipesh.razorpay.merchant.repository.ApiKeyRepository;
 
@@ -22,7 +27,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 
@@ -34,6 +38,13 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     public static final String BASIC_PREFIX = "Basic ";
     public static final String ROLE_API_KEY = "ROLE_API_KEY";
 
+    // Per-API-key quota: 100 requests / minute (burst of 100, refill ~1.667 tokens/sec).
+    private static final int API_KEY_CAPACITY = 100; // TODO: externalize via @ConfigurationProperties once we have per-tier plans.
+    private static final double API_KEY_REFILL_PER_SEC = 100.0 / 60.0;
+    private static final String RATE_LIMIT_KEY_PREFIX = "apikey:";
+
+    private final ApiKeyCache apiKeyCache;
+    private final RateLimiter rateLimiter;
     private final MerchantContext merchantContext;
     private final PasswordEncoder passwordEncoder;
     private final ApiKeyRepository apiKeyRepository;
@@ -56,18 +67,24 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 String keyId = credentials[0];
                 String rawSecret = credentials[1];
 
-                ApiKey apiKey = apiKeyRepository.findByKeyId(keyId).orElseThrow(() -> new BadCredentialsException("Invalid or Missing API Key ID"));
+                ApiKeyCacheEntry cachedEntry = apiKeyCache.get(keyId).orElseGet(() -> loadAndCache(keyId));
 
-                if (!apiKey.isEnabled() || !secretMatches(apiKey, rawSecret)) {
+                if(cachedEntry == null){
+                    throw new BadCredentialsException("Invalid or Missing API Key");
+                }
+
+                if (!cachedEntry.enabled() || !secretMatches(cachedEntry, rawSecret)) {
                     throw new BadCredentialsException("API Key is disabled or secret does not match");
                 }
+
+                enforceRateLimit(keyId, response);
 
                 var auth = new UsernamePasswordAuthenticationToken(keyId, null, List.of(new SimpleGrantedAuthority(ROLE_API_KEY)));
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
-                merchantContext.setMerchantId(apiKey.getMerchant().getId());
-                merchantContext.setKeyId(apiKey.getKeyId());
+                merchantContext.setMerchantId(cachedEntry.merchantId());
+                merchantContext.setKeyId(cachedEntry.keyId());
             }
 
             log.info("Moving to the next filter");
@@ -79,15 +96,54 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean secretMatches(ApiKey apiKey, String rawSecret) {
-        if(passwordEncoder.matches(rawSecret, apiKey.getKeySecretHash())) {
+    private void enforceRateLimit(String keyId, HttpServletResponse response) {
+        RateLimitResult result = rateLimiter.check(RATE_LIMIT_KEY_PREFIX + keyId, API_KEY_CAPACITY, API_KEY_REFILL_PER_SEC);
+
+        response.setHeader("X-RateLimit-Limit", String.valueOf(API_KEY_CAPACITY));
+        response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, result.remaining())));
+
+        if (!result.isAllowed()) {
+            long retryAfterSeconds = result.retryAfterSeconds();
+            log.warn("Rate limit exceeded for apiKeyId={}, retryAfterSeconds={}", keyId, retryAfterSeconds);
+
+            throw new RateLimitExceededException(
+                    "RATE_LIMIT_EXCEEDED",
+                    "Too many requests for this API key. Retry after " + retryAfterSeconds + "s.",
+                    retryAfterSeconds,
+                    Math.max(0, result.remaining())
+            );
+        }
+    }
+
+    private ApiKeyCacheEntry loadAndCache(String keyId) {
+        ApiKey apiKey = apiKeyRepository.findByKeyId(keyId).orElse(null);
+
+        if (apiKey == null) {
+            return null;
+        }
+
+        ApiKeyCacheEntry entry = new ApiKeyCacheEntry(
+                apiKey.getKeyId(),
+                apiKey.getKeySecretHash(),
+                apiKey.getPreviousKeySecretHash(),
+                apiKey.getGracePeriodExpiresAt(),
+                apiKey.getMerchant().getId(),
+                apiKey.getEnvironment(),
+                apiKey.isEnabled()
+        );
+
+        apiKeyCache.put(keyId, entry);
+        return entry;
+    }
+
+    private boolean secretMatches(ApiKeyCacheEntry cacheEntry, String rawSecret) {
+        if(passwordEncoder.matches(rawSecret, cacheEntry.keySecretHash())) {
             return true;
         }
 
-        LocalDateTime gracePeriod = apiKey.getGracePeriodExpiresAt();
-        String previousKeySecretHash = apiKey.getPreviousKeySecretHash();
+        String previousKeySecretHash = cacheEntry.previousKeySecretHash();
 
-        return gracePeriod != null && LocalDateTime.now().isBefore(gracePeriod) && passwordEncoder.matches(rawSecret, previousKeySecretHash);
+        return cacheEntry.isInGracePeriod() && passwordEncoder.matches(rawSecret, previousKeySecretHash);
     }
 
     private String[] decode(String header) {

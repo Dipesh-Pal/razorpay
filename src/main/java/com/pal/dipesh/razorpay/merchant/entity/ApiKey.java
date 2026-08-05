@@ -99,4 +99,8 @@ public class ApiKey {
     @CreatedBy
     @Column(name = "created_by", updatable = false)
     private String createdBy;
+
+    public boolean isInGracePeriod() {
+        return gracePeriodExpiresAt != null && LocalDateTime.now().isBefore(gracePeriodExpiresAt);
+    }
 }

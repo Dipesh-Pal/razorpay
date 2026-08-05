@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface VaultService {
-
     TokenizeResponse tokenize(TokenizeRequest tokenizeRequest, UUID merchantId);
 
     PaymentProcessorResponse charge(String token, UUID paymentId, Money amount, Map<String, Object> methodDetails);

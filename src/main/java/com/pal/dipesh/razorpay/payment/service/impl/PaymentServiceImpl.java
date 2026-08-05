@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public PaymentResponse initiate(UUID merchantId, PaymentInitiateRequest request) {
-        OrderRecord order = orderRepository.findByIdAndMerchantId(request.orderId(), merchantId)
+        OrderRecord order = orderRepository.findByIdAndMerchantIdForUpdate(request.orderId(), merchantId)
                 .orElseThrow(() -> {
                     log.warn("Order with id {} not found for merchant {}", request.orderId(), merchantId);
                     return new ResourceNotFoundException("order", request.orderId());
@@ -106,7 +107,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public PaymentResponse capture(UUID merchantId, UUID paymentId) {
-        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId, merchantId)
+        Payment payment = paymentRepository.findByIdAndMerchantIdForUpdate(paymentId, merchantId)
                 .orElseThrow(() -> {
                     log.warn("Payment with id {} not found for merchant {}", paymentId, merchantId);
                     return new ResourceNotFoundException("Payment", paymentId);
@@ -140,7 +141,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void resolveAuthorization(UUID paymentId, boolean approve, String bankRef, String errorCode, String errorDescription) {
-        Payment payment = paymentRepository.findById(paymentId)
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId)
                 .orElseThrow(() -> {
                     log.warn("Payment with id {} not found", paymentId);
                     return new ResourceNotFoundException("Payment", paymentId);

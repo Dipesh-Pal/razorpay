@@ -33,8 +33,6 @@ public class CardPaymentAdapter implements PaymentAdapter {
 
     @Override
     public PaymentResult capture(UUID paymentId) {
-        System.out.println("Capture card payment...");
-
-        return null;
+        return new PaymentResult.Success("CARD_PAYMENT_CAPTURE_SUCCESS", "Card payment captured successfully");
     }
 }

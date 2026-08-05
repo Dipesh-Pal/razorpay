@@ -1,5 +1,6 @@
 package com.pal.dipesh.razorpay.merchant.security;
 
+import com.pal.dipesh.razorpay.common.idempotency.IdempotencyFilter;
 import com.pal.dipesh.razorpay.merchant.security.filters.ApiKeyAuthenticationFilter;
 import com.pal.dipesh.razorpay.merchant.security.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class WebSecurityConfig {
     private static final String[] JWT_ROUTES = {"/api/v1/auth/**", "/api/v1/merchants/**", "/api/v1/admin/**", "/actuator/**"};
     private static final String[] API_KEY_ROUTES = {"/api/v1/orders/**", "/api/v1/payments/**", "/api/v1/vault/**"};
 
+    private final IdempotencyFilter idempotencyFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
@@ -45,6 +47,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 
@@ -59,6 +62,7 @@ public class WebSecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter, ApiKeyAuthenticationFilter.class)
                 .build();
     }
 

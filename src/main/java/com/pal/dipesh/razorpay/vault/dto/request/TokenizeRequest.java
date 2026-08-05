@@ -27,7 +27,6 @@ public record TokenizeRequest(
         @ExpiryYear
         Integer expiryYear,
 
-        @NotNull(message = "Customer ID is required")
         UUID customerId,
 
         @Min(value = 3, message = "Card holder name must be at least 3 character long")

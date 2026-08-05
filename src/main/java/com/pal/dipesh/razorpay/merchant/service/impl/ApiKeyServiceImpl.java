@@ -3,6 +3,7 @@ package com.pal.dipesh.razorpay.merchant.service.impl;
 import com.pal.dipesh.razorpay.common.exception.ApiKeyDisabledException;
 import com.pal.dipesh.razorpay.common.exception.ResourceNotFoundException;
 import com.pal.dipesh.razorpay.common.util.RandomizerUtil;
+import com.pal.dipesh.razorpay.merchant.cache.ApiKeyCache;
 import com.pal.dipesh.razorpay.merchant.dto.request.ApiKeyCreateRequest;
 import com.pal.dipesh.razorpay.merchant.dto.response.ApiKeyCreateResponse;
 import com.pal.dipesh.razorpay.merchant.dto.response.ApiKeyResponse;
@@ -11,6 +12,7 @@ import com.pal.dipesh.razorpay.merchant.entity.Merchant;
 import com.pal.dipesh.razorpay.merchant.mapper.ApiKeyMapper;
 import com.pal.dipesh.razorpay.merchant.repository.ApiKeyRepository;
 import com.pal.dipesh.razorpay.merchant.repository.MerchantRepository;
+import com.pal.dipesh.razorpay.merchant.security.AppUserContext;
 import com.pal.dipesh.razorpay.merchant.service.ApiKeyService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,9 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AppUserContext appUserContext;
     private final ApiKeyMapper apiKeyMapper;
+    private final ApiKeyCache apiKeyCache;
 
     @Override
     @Transactional
@@ -67,10 +71,6 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     @Override
     @Transactional
     public void revoke(UUID merchantId, String keyId) {
-//        ApiKey apiKey = apiKeyRepository.findByKeyId(keyId)
-//                .filter(k -> k.getMerchant().getId().equals(merchantId))
-//                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", keyId));
-
         ApiKey apiKey = apiKeyRepository.findByKeyIdAndMerchant_Id(keyId, merchantId)
                 .orElseThrow(() -> {
                     log.warn("Api key with keyId {} not found for merchant {}", keyId, merchantId);
@@ -79,8 +79,9 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         apiKey.setEnabled(false);
         apiKey.setRevokedAt(LocalDateTime.now());
-        apiKey.setRevokedBy("system"); // TODO: set actual user who revoked the key
+        apiKey.setRevokedBy(appUserContext.getUsername());
 
+        apiKeyCache.evict(apiKey.getKeyId());
         apiKeyRepository.save(apiKey);
     }
 
@@ -101,10 +102,12 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
         apiKey.setKeySecretHash(passwordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());
-        apiKey.setRotatedBy("system"); // TODO: set actual user who rotated the key
+        apiKey.setRotatedBy(appUserContext.getUsername());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24)); // 24 hours grace period for old key to work
 
-        apiKeyRepository.save(apiKey);
+        apiKey = apiKeyRepository.save(apiKey);
+
+        apiKeyCache.evict(apiKey.getKeyId());
 
         return apiKeyMapper.toApiKeyCreateResponse(apiKey, newRawSecret);
     }

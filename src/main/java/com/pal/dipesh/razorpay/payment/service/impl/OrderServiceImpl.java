@@ -4,6 +4,7 @@ import com.pal.dipesh.razorpay.common.enums.OrderStatus;
 import com.pal.dipesh.razorpay.common.exception.BusinessRuleViolationException;
 import com.pal.dipesh.razorpay.common.exception.DuplicateResourceException;
 import com.pal.dipesh.razorpay.common.exception.ResourceNotFoundException;
+import com.pal.dipesh.razorpay.merchant.service.CustomerService;
 import com.pal.dipesh.razorpay.payment.dto.request.OrderCreateRequest;
 import com.pal.dipesh.razorpay.payment.dto.response.OrderResponse;
 import com.pal.dipesh.razorpay.payment.dto.response.PaymentResponse;
@@ -32,10 +33,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
-    private final OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
+    private final CustomerService customerService;
     private final PaymentMapper paymentMapper;
+    private final OrderMapper orderMapper;
 
     @Value("${payment.order.default-expiry-minutes:30}")
     private int defaultOrderExpiryMinutes;
@@ -48,10 +50,21 @@ public class OrderServiceImpl implements OrderService {
             throw new DuplicateResourceException("DUPLICATE_ORDER_RECEIPT", "Order with receipt " + request.receipt() + " already exists for merchant " + merchantId);
         }
 
+        UUID customerId = null;
+
+        if(request.customer() != null) {
+            customerId = customerService.findOrCreate(merchantId,
+                    request.customer().email(),
+                    request.customer().name(),
+                    request.customer().phone()
+            );
+        }
+
         OrderRecord newOrder = OrderRecord
                 .builder()
                 .amount(request.amount())
                 .notes(request.notes())
+                .customerId(customerId)
                 .merchantId(merchantId)
                 .receipt(request.receipt())
                 .orderStatus(OrderStatus.CREATED)

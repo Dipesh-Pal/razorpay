@@ -8,10 +8,14 @@ import com.pal.dipesh.razorpay.merchant.dto.request.MerchantSignupRequest;
 import com.pal.dipesh.razorpay.merchant.dto.response.LoginResponse;
 import com.pal.dipesh.razorpay.merchant.dto.response.MerchantResponse;
 import com.pal.dipesh.razorpay.merchant.dto.response.TokenRefreshResponse;
+import com.pal.dipesh.razorpay.merchant.security.filters.JwtAuthenticationFilter;
 import com.pal.dipesh.razorpay.merchant.security.rsa.TokenPair;
 import com.pal.dipesh.razorpay.merchant.service.AuthService;
 import com.pal.dipesh.razorpay.merchant.service.AuthService.AuthResult;
 
+import io.jsonwebtoken.Claims;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,9 +82,44 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @ResponseMessage("Access Token Refreshed")
-    public ResponseEntity<TokenRefreshResponse> refreshToken() {
-        TokenPair tokenPair = authService.refreshToken();
+    public ResponseEntity<TokenRefreshResponse> refreshToken(HttpServletRequest request) {
+        Claims refreshClaims = (Claims) request.getAttribute(JwtAuthenticationFilter.REFRESH_TOKEN_CLAIMS_ATTR);
+        Claims accessClaims  = (Claims) request.getAttribute(JwtAuthenticationFilter.ACCESS_TOKEN_CLAIMS_ATTR);
 
-        return null;
+        TokenPair tokens = authService.refreshTokens(accessClaims, refreshClaims);
+
+        ResponseCookie refreshCookie = cookieUtil.buildRefreshCookie(
+                tokens.refreshToken(),
+                tokens.refreshTokenExpiresAt()
+        );
+
+        Instant now = Instant.now();
+        TokenRefreshResponse body = new TokenRefreshResponse(
+                tokens.accessToken(),
+                TokenType.ACCESS,
+                secondsUntil(now, tokens.accessTokenExpiresAt()),
+                secondsUntil(now, tokens.refreshTokenExpiresAt())
+        );
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(body);
+    }
+
+    @PostMapping("/logout")
+    @ResponseMessage("Logged Out Successfully")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        Claims accessClaims = (Claims) request.getAttribute(JwtAuthenticationFilter.ACCESS_TOKEN_CLAIMS_ATTR);
+        String refreshCookieValue = JwtAuthenticationFilter.readRefreshCookie(request);
+
+        authService.invalidateTokens(accessClaims, refreshCookieValue);
+
+        SecurityContextHolder.clearContext();
+
+        ResponseCookie deleteCookie = cookieUtil.clearRefreshCookie();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
     }
 }

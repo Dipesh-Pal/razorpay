@@ -48,6 +48,9 @@ public class OrderRecord extends BaseAuditEntity {
     @Column(name = "merchant_id", nullable = false, updatable = false)
     private UUID merchantId;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
     @Embedded
     private Money amount;
 

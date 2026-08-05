@@ -55,7 +55,7 @@ public class CardToken {
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
 
-    @Column(name = "merchant_id", nullable = false)
+    @Column(name = "merchant_id")
     private UUID merchantId;
 
     @Column(name = "token", nullable = false, unique = true, length = 50)

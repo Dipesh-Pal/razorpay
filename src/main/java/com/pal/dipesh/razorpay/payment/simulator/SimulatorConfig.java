@@ -2,10 +2,11 @@ package com.pal.dipesh.razorpay.payment.simulator;
 
 import com.pal.dipesh.razorpay.common.enums.ChaosMode;
 import com.pal.dipesh.razorpay.common.enums.PaymentMethod;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
