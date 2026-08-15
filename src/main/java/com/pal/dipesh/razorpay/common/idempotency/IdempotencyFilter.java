@@ -38,7 +38,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     private final AppUserContext appUserContext;
     private final MerchantContext merchantContext;
     private final IdempotencyStore idempotencyStore;
-    private final HandlerExceptionResolver exceptionResolver;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -69,7 +69,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
             } else {
                 // Key is in progress, return 409 Conflict
                 var ex = new IdemPotencyConflictException("A Request with this Idempotency-Key is already in progress.");
-                exceptionResolver.resolveException(request, response, null, ex);
+                handlerExceptionResolver.resolveException(request, response, null, ex);
             }
 
             return;

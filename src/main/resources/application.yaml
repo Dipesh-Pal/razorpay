@@ -19,6 +19,28 @@ spring:
         jdbc:
           time_zone: Asia/Kolkata
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 3
+        spring.json.add.type.headers: false
+    consumer:
+        group-id: ${KAFKA_CONSUMER_GROUP_ID:razorpay-monolith}
+        auto-offset-reset: earliest
+        enable-auto-commit: false
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        properties:
+            spring.json.trusted.packages: "com.pal.dipesh.razorpay.*"
+            spring.json.use.type.headers: false
+            spring.json.value.default.type: java.util.LinkedHashMap
+
   data:
     redis:
       host: localhost
@@ -34,6 +56,18 @@ spring:
 app:
   vault:
     master-key: ${PAYMENT_MASTER_KEY:}
+
+  webhook:
+    delivery:
+      redis-key: "webhook-retry"
+      poll-batch-size: 100
+
+  kafka:
+    topics:
+      payment: payment.events
+      order: order.events
+      refund: refund.events
+      settlement: settlement.events
 
   security:
     jwt:

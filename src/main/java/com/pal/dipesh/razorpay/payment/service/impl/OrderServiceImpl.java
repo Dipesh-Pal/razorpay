@@ -1,5 +1,6 @@
 package com.pal.dipesh.razorpay.payment.service.impl;
 
+import com.pal.dipesh.razorpay.common.enums.EventAggregateType;
 import com.pal.dipesh.razorpay.common.enums.OrderStatus;
 import com.pal.dipesh.razorpay.common.exception.BusinessRuleViolationException;
 import com.pal.dipesh.razorpay.common.exception.DuplicateResourceException;
@@ -12,6 +13,7 @@ import com.pal.dipesh.razorpay.payment.entity.OrderRecord;
 import com.pal.dipesh.razorpay.payment.entity.Payment;
 import com.pal.dipesh.razorpay.payment.mapper.OrderMapper;
 import com.pal.dipesh.razorpay.payment.mapper.PaymentMapper;
+import com.pal.dipesh.razorpay.payment.outbox.OutboxEventPublisher;
 import com.pal.dipesh.razorpay.payment.repository.OrderRepository;
 import com.pal.dipesh.razorpay.payment.repository.PaymentRepository;
 import com.pal.dipesh.razorpay.payment.service.OrderService;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +36,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
+    private final OutboxEventPublisher outboxEventPublisher;
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
@@ -73,7 +77,17 @@ public class OrderServiceImpl implements OrderService {
 
         newOrder = orderRepository.save(newOrder);
 
-        // TODO: Publish Order Created event to Kafka
+        outboxEventPublisher.publish(
+                EventAggregateType.ORDER,
+                newOrder.getId(),
+                "ORDER_CREATED",
+                Map.of("orderId", newOrder.getId().toString(),
+                        "merchantId", newOrder.getMerchantId().toString(),
+                        "orderStatus", newOrder.getOrderStatus().name(),
+                        "amountUnits", newOrder.getAmount().getAmountUnits(),
+                        "amountCurrency", newOrder.getAmount().getCurrency()
+                )
+        );
 
         return orderMapper.toOrderResponse(newOrder);
     }
@@ -110,6 +124,18 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderStatus(OrderStatus.CANCELLED);
         order = orderRepository.save(order);
+
+        outboxEventPublisher.publish(
+                EventAggregateType.ORDER,
+                order.getId(),
+                "ORDER_CANCELLED",
+                Map.of("orderId", order.getId().toString(),
+                        "merchantId", order.getMerchantId().toString(),
+                        "orderStatus", order.getOrderStatus().name(),
+                        "amountUnits", order.getAmount().getAmountUnits(),
+                        "amountCurrency", order.getAmount().getCurrency()
+                )
+        );
 
         return orderMapper.toOrderResponse(order);
     }

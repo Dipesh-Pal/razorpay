@@ -1,8 +1,10 @@
 package com.pal.dipesh.razorpay;
 
+import com.pal.dipesh.razorpay.common.config.KafkaProperties;
 import com.pal.dipesh.razorpay.merchant.security.CookieProperties;
 import com.pal.dipesh.razorpay.merchant.security.rsa.RsaKeyProperties;
 import com.pal.dipesh.razorpay.payment.simulator.SimulatorConfig;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableScheduling
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditorAwareImpl")
-@EnableConfigurationProperties({SimulatorConfig.class, RsaKeyProperties.class, CookieProperties.class})
+@EnableConfigurationProperties({SimulatorConfig.class, RsaKeyProperties.class, CookieProperties.class, KafkaProperties.class})
 public class RazorpayApplication {
 
 	public static void main(String[] args) {

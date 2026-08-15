@@ -39,8 +39,8 @@ public class VaultServiceImpl implements VaultService {
     private final PaymentProcessorRouter paymentProcessorRouter;
     private final VaultCardRepository vaultCardRepository;
     private final CardTokenRepository cardTokenRepository;
+    private final BytesEncryptor masterKeyEncryptor;
     private final VaultCardMapper vaultCardMapper;
-    private final BytesEncryptor dekEncryptor;
 
     @Override
     @Transactional
@@ -52,7 +52,7 @@ public class VaultServiceImpl implements VaultService {
 
         byte[] dek = KeyGenerators.secureRandom(32).generateKey();
         byte[] encryptedPan = VaultEncryptionConfig.getEncryptor(dek).encrypt(tokenizeRequest.pan().getBytes(StandardCharsets.UTF_8));
-        byte[] encryptedDek = dekEncryptor.encrypt(dek);
+        byte[] encryptedDek = masterKeyEncryptor.encrypt(dek);
 
         VaultCard vaultCard = VaultCard.builder()
                 .lastFour(lastFour)
@@ -90,7 +90,7 @@ public class VaultServiceImpl implements VaultService {
         String decryptedPan = null;
 
         try {
-            dek = dekEncryptor.decrypt(vaultCard.getEncryptedDek());
+            dek = masterKeyEncryptor.decrypt(vaultCard.getEncryptedDek());
             decryptedPanBytes = VaultEncryptionConfig.getEncryptor(dek).decrypt(vaultCard.getEncryptedPan());
 
             decryptedPan = new String(decryptedPanBytes, StandardCharsets.UTF_8);

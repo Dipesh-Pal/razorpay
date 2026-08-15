@@ -98,7 +98,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
            throw new ApiKeyDisabledException("API_KEY_DISABLED", "API key with id " + keyId + " is disabled and cannot be rotated");
         }
 
-        String newRawSecret = RandomizerUtil.randomBase64(40);
+        String newRawSecret = RandomizerUtil.randomBase64(48);
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
         apiKey.setKeySecretHash(passwordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());

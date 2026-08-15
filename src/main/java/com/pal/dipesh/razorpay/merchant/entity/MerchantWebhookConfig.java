@@ -10,7 +10,7 @@ import lombok.*;
  *
  * <p>Extends {@link BaseAuditEntity} — and full auditing is <strong>strongly
  * justified</strong> here: changing {@link #targetUrl} or rotating
- * {@link #webhookSecretHash} are prime exfiltration vectors (an attacker who
+ * {@link #webhookSecret} are prime exfiltration vectors (an attacker who
  * repoints webhooks captures payment events). Knowing the last actor on this
  * row is a security control, not a nice-to-have.
  */
@@ -41,8 +41,24 @@ public class MerchantWebhookConfig extends BaseAuditEntity {
 
     @Builder.Default
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = true;
+    private Boolean enabled = true;
 
     @Column(name = "webhook_secret_hash", nullable = false, length = 300)
-    private String webhookSecretHash;
+    private String webhookSecret;
+
+    public boolean isSubscribedTo(String eventType) {
+        if (eventTypes == null || eventTypes.isBlank()) {
+            return true;
+        }
+
+        for (String type : eventTypes.split(",")) {
+            String trimmedType = type.trim();
+
+            if (trimmedType.equalsIgnoreCase("ALL") || trimmedType.equalsIgnoreCase(eventType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

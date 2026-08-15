@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.Optional;
 
@@ -22,6 +23,10 @@ public class AuditorAwareImpl implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
+        if (RequestContextHolder.getRequestAttributes() == null) {
+            return Optional.of(SYSTEM_AUDITOR);
+        }
+
         if (appUserContext.getUsername() != null) {
             return Optional.of(appUserContext.getUsername());
         } else if (merchantContext.getKeyId() != null) {
