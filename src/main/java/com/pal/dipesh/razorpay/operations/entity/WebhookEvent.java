@@ -52,6 +52,10 @@ public class WebhookEvent {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "merchant_id", nullable = false, updatable = false)
     private UUID merchantId;
 

@@ -15,12 +15,14 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         jdbc:
           time_zone: Asia/Kolkata
 
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    listeners:
+      ack-mode: MANUAL
     producer:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -53,6 +55,10 @@ spring:
           max-idle: 5
           min-idle: 1
 
+thread:
+  virtual:
+    enabled: true
+
 app:
   vault:
     master-key: ${PAYMENT_MASTER_KEY:}
@@ -61,6 +67,11 @@ app:
     delivery:
       redis-key: "webhook-retry"
       poll-batch-size: 100
+      signature-header: "X-Razorpay-Signature"
+      visibility-timeout: PT2M
+    inbox:
+      retention-days: 30
+      cleanup-cron: "0 0 3 * * *"
 
   kafka:
     topics:

@@ -19,7 +19,7 @@ public class AesEncryptionConfig {
 
     @Bean
     public BytesEncryptor masterKeyEncryptor() {
-        SecretKey secretKey = new SecretKeySpec(Base64.getDecoder().decode(masterKey), "AES");
+        SecretKey secretKey = new SecretKeySpec(Base64.getDecoder().decode(masterKey), "AES/GCM/NoPadding");
         return new AesBytesEncryptor(secretKey, KeyGenerators.secureRandom(12), AesBytesEncryptor.CipherAlgorithm.GCM);
     }
 }

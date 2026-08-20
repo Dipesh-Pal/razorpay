@@ -34,6 +34,7 @@ public class OutboxPoller {
                 String key = extractMerchantId(event.getPayload());
 
                 Map<String, Object> envelope = Map.of(
+                        "eventId", event.getId().toString(),
                         "eventType", event.getEventType(),
                         "aggregateType", event.getAggregateType().name(),
                         "aggregateId", event.getAggregateId().toString(),

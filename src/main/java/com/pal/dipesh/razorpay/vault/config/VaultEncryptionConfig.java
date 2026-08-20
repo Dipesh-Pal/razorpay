@@ -1,6 +1,5 @@
 package com.pal.dipesh.razorpay.vault.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.encrypt.BytesEncryptor;
@@ -11,9 +10,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 public class VaultEncryptionConfig {
-
-    @Value("${app.vault.master-key}")
-    private String masterKey;
 
     public static BytesEncryptor getEncryptor(byte[] dek) {
         SecretKey secretKey = new SecretKeySpec(dek, "AES");
