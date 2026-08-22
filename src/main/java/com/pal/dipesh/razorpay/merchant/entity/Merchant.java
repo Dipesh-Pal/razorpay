@@ -1,20 +1,16 @@
 package com.pal.dipesh.razorpay.merchant.entity;
 
-import com.pal.dipesh.razorpay.common.entity.BaseAuditEntity;
+import com.pal.dipesh.razorpay.common.pojo.BaseAuditEntity;
 import com.pal.dipesh.razorpay.common.enums.BusinessType;
 import com.pal.dipesh.razorpay.common.enums.MerchantStatus;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import lombok.*;
 
 /**
  * Top-level merchant aggregate — the tenancy boundary for almost every other
- * entity in the system (most tables carry a {@code merchant_id} foreign key
+ * pojo in the system (most tables carry a {@code merchant_id} foreign key
  * or denormalized id back to this row).
  *
  * <p>Extends {@link BaseAuditEntity} because a merchant is a long-lived
@@ -31,7 +27,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "merchant")
+@Table(
+        name = "merchant",
+        indexes = {
+                @Index(name = "idx_merchant_status", columnList = "status")
+        }
+)
 @EqualsAndHashCode(callSuper = true)
 public class Merchant extends BaseAuditEntity {
 

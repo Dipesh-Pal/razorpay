@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.payment.dto.request;
 
-import com.pal.dipesh.razorpay.common.entity.Money;
+import com.pal.dipesh.razorpay.common.pojo.Money;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;

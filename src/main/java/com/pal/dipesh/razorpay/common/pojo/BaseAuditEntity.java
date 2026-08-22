@@ -1,4 +1,4 @@
-package com.pal.dipesh.razorpay.common.entity;
+package com.pal.dipesh.razorpay.common.pojo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -30,9 +30,9 @@ import java.util.UUID;
  *
  * <p>All four fields are populated by Spring Data JPA Auditing via
  * {@link AuditingEntityListener}. Auditing is enabled application-wide in
- * {@link JpaAuditingConfig}.
+ * {@link com.pal.dipesh.razorpay.RazorpayApplication}.
  *
- * <h2>Renaming an inherited column in a child entity</h2>
+ * <h2>Renaming an inherited column in a child pojo</h2>
  * Use {@link jakarta.persistence.AttributeOverride} on the child class to
  * point an inherited field at a different column name, for example:
  * <pre>{@code
@@ -49,7 +49,7 @@ import java.util.UUID;
  * of these columns, prefer one of:
  * <ol>
  *   <li>Leave the column nullable in that table (it costs almost nothing).</li>
- *   <li>Do not extend {@code BaseAuditEntity} for that one entity; declare
+ *   <li>Do not extend {@code BaseAuditEntity} for that one pojo; declare
  *       only the fields it needs.</li>
  * </ol>
  */

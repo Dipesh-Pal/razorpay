@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.payment.dto.response;
 
-import com.pal.dipesh.razorpay.common.entity.Money;
+import com.pal.dipesh.razorpay.common.pojo.Money;
 import com.pal.dipesh.razorpay.common.enums.OrderStatus;
 
 import java.time.LocalDateTime;

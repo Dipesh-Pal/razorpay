@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.operations.entity;
 
-import com.pal.dipesh.razorpay.common.entity.Money;
+import com.pal.dipesh.razorpay.common.pojo.Money;
 import com.pal.dipesh.razorpay.common.enums.SettlementStatus;
 
 import jakarta.persistence.*;
@@ -100,6 +100,9 @@ public class Settlement {
 
     @Column(name = "failed_at")
     private LocalDateTime failedAt;
+
+    @Column(name = "failure_reason", length = 1000)
+    private String failureReason;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

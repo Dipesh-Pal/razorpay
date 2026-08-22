@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.payment.entity;
 
-import com.pal.dipesh.razorpay.common.entity.Money;
+import com.pal.dipesh.razorpay.common.pojo.Money;
 import com.pal.dipesh.razorpay.common.enums.RefundStatus;
 
 import jakarta.persistence.*;

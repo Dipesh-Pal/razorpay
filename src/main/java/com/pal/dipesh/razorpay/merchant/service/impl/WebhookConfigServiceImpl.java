@@ -2,10 +2,8 @@ package com.pal.dipesh.razorpay.merchant.service.impl;
 
 import com.pal.dipesh.razorpay.common.exception.ResourceNotFoundException;
 import com.pal.dipesh.razorpay.common.util.RandomizerUtil;
-import com.pal.dipesh.razorpay.merchant.api.MerchantWebhookApi;
 import com.pal.dipesh.razorpay.merchant.dto.request.UpdateWebhookConfigRequest;
 import com.pal.dipesh.razorpay.merchant.dto.response.WebhookConfigResponse;
-import com.pal.dipesh.razorpay.common.entity.WebhookTarget;
 import com.pal.dipesh.razorpay.merchant.entity.Merchant;
 import com.pal.dipesh.razorpay.merchant.entity.MerchantWebhookConfig;
 import com.pal.dipesh.razorpay.merchant.mapper.WebhookConfigMapper;
@@ -29,7 +27,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class WebhookConfigServiceImpl implements WebhookConfigService, MerchantWebhookApi {
+public class WebhookConfigServiceImpl implements WebhookConfigService {
 
     private final WebhookConfigRepository webhookConfigRepository;
     private final WebhookConfigMapper webhookConfigMapper;
@@ -96,21 +94,5 @@ public class WebhookConfigServiceImpl implements WebhookConfigService, MerchantW
 
     private MerchantWebhookConfig requireOwnedConfig(UUID merchantId, UUID configId) {
         return webhookConfigRepository.findByIdAndMerchant_Id(configId, merchantId).orElseThrow(() -> new ResourceNotFoundException("MerchantWebhookConfig", configId));
-    }
-
-    @Override
-    public List<WebhookTarget> getActiveConfigsForEvent(UUID merchantId, String eventType) {
-        return webhookConfigRepository.findByMerchant_IdAndEnabledTrue(merchantId).stream()
-                .filter(config -> config.isSubscribedTo(eventType))
-                .map(config -> {
-                    byte[] decryptedSecretBytes = masterKeyEncryptor.decrypt(Base64.getDecoder().decode(config.getWebhookSecret()));
-
-                    return new WebhookTarget(
-                            config.getId(),
-                            config.getTargetUrl(),
-                            new String(decryptedSecretBytes, StandardCharsets.UTF_8)
-                    );
-                })
-                .toList();
     }
 }

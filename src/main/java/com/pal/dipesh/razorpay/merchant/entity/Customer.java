@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.merchant.entity;
 
-import com.pal.dipesh.razorpay.common.entity.BaseAuditEntity;
+import com.pal.dipesh.razorpay.common.pojo.BaseAuditEntity;
 
 import jakarta.persistence.*;
 

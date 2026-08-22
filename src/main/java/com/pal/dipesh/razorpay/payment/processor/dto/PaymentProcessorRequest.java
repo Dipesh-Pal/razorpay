@@ -1,6 +1,6 @@
 package com.pal.dipesh.razorpay.payment.processor.dto;
 
-import com.pal.dipesh.razorpay.common.entity.Money;
+import com.pal.dipesh.razorpay.common.pojo.Money;
 import com.pal.dipesh.razorpay.common.enums.PaymentMethod;
 
 import java.util.Map;

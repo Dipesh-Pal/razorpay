@@ -55,9 +55,9 @@ spring:
           max-idle: 5
           min-idle: 1
 
-thread:
-  virtual:
-    enabled: true
+  threads:
+    virtual:
+      enabled: true
 
 app:
   vault:

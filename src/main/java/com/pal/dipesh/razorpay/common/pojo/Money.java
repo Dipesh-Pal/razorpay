@@ -1,4 +1,4 @@
-package com.pal.dipesh.razorpay.common.entity;
+package com.pal.dipesh.razorpay.common.pojo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

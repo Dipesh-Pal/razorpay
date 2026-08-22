@@ -1,4 +1,4 @@
-package com.pal.dipesh.razorpay.common.entity;
+package com.pal.dipesh.razorpay.common.pojo;
 
 import java.util.UUID;
 

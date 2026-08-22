@@ -2,7 +2,7 @@ package com.pal.dipesh.razorpay.common.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pal.dipesh.razorpay.common.annotation.ResponseMessage;
-import com.pal.dipesh.razorpay.common.entity.ApiResponse;
+import com.pal.dipesh.razorpay.common.pojo.ApiResponse;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;

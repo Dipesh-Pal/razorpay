@@ -1,7 +1,7 @@
 package com.pal.dipesh.razorpay.common.advice;
 
-import com.pal.dipesh.razorpay.common.entity.ApiError;
-import com.pal.dipesh.razorpay.common.entity.ApiResponse;
+import com.pal.dipesh.razorpay.common.pojo.ApiError;
+import com.pal.dipesh.razorpay.common.pojo.ApiResponse;
 import com.pal.dipesh.razorpay.common.exception.*;
 import com.pal.dipesh.razorpay.common.util.CookieUtil;
 

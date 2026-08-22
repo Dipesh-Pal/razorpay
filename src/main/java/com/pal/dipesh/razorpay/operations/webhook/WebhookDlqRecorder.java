@@ -31,7 +31,7 @@ public class WebhookDlqRecorder {
      * either both commit or both roll back.
      *
      * <p>Does <strong>not</strong> mutate {@code webhookEvent}'s status here:
-     * the caller sets {@code status = DEAD} on the managed entity and Hibernate
+     * the caller sets {@code status = DEAD} on the managed pojo and Hibernate
      * flushes it at commit alongside this insert.
      */
     @Transactional

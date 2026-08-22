@@ -22,16 +22,16 @@ public interface ApiKeyMapper {
      * <p>{@code ignoreByDefault = true} flips MapStruct into an "allow-list"
      * mode: nothing is auto-mapped from {@link ApiKey}. Only the targets
      * explicitly listed below are populated. This is a defensive guarantee
-     * that no sensitive entity field (e.g. {@code keySecretHash},
+     * that no sensitive pojo field (e.g. {@code keySecretHash},
      * {@code webHookSecretHash}) can leak into the DTO, even if names happen
      * to align in the future.
      *
      * <p>The raw secret is supplied by the caller (service layer) as a
-     * separate parameter rather than read from the entity, because the entity
+     * separate parameter rather than read from the pojo, because the pojo
      * only stores the <em>hash</em>. The raw secret is plaintext and exists
      * only for the lifetime of this single create call.
      *
-     * @param apiKey    persisted entity (must not be {@code null})
+     * @param apiKey    persisted pojo (must not be {@code null})
      * @param rawSecret freshly generated plaintext secret to expose to the
      *                  caller exactly once; must not be {@code null}
      */
@@ -47,11 +47,11 @@ public interface ApiKeyMapper {
      *
      * <p>Like {@link #toApiKeyCreateResponse(ApiKey, String)}, this method
      * uses {@code ignoreByDefault = true} so MapStruct operates in
-     * "allow-list" mode: no field is auto-copied from the entity. Only the
+     * "allow-list" mode: no field is auto-copied from the pojo. Only the
      * non-sensitive, listing-safe attributes explicitly enumerated below are
      * populated.
      *
-     * <p>The following sensitive entity fields are <strong>deliberately
+     * <p>The following sensitive pojo fields are <strong>deliberately
      * excluded</strong> and must never appear on this DTO:
      * <ul>
      *   <li>{@code keySecretHash}, {@code previousKeySecretHash},
@@ -74,7 +74,7 @@ public interface ApiKeyMapper {
      * {@link #toApiKeyResponse(List)}; keep it as the single source of truth
      * for field-level mapping rules.
      *
-     * @param apiKey persisted entity (must not be {@code null})
+     * @param apiKey persisted pojo (must not be {@code null})
      * @return DTO containing only listing-safe attributes of the API key
      */
     @BeanMapping(ignoreByDefault = true)

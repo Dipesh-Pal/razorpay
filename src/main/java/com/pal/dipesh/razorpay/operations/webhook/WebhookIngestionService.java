@@ -3,10 +3,10 @@ package com.pal.dipesh.razorpay.operations.webhook;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.pal.dipesh.razorpay.common.entity.WebhookTarget;
+import com.pal.dipesh.razorpay.common.pojo.WebhookTarget;
 import com.pal.dipesh.razorpay.common.enums.WebhookEventStatus;
 import com.pal.dipesh.razorpay.common.util.SignerUtil;
-import com.pal.dipesh.razorpay.merchant.api.MerchantWebhookApi;
+import com.pal.dipesh.razorpay.merchant.api.MerchantLookupService;
 import com.pal.dipesh.razorpay.operations.entity.WebhookEvent;
 import com.pal.dipesh.razorpay.operations.repository.InboxEventRepository;
 import com.pal.dipesh.razorpay.operations.repository.WebhookEventRepository;
@@ -30,7 +30,7 @@ import java.util.UUID;
  * <p>Idempotent against Kafka redelivery: the first action is a
  * {@code tryInsert} into {@code inbox_event}. A duplicate delivery returns
  * an empty list <strong>before</strong> the merchant-configuration lookup
- * ({@link MerchantWebhookApi}), which today is an in-process call but will
+ * ({@link MerchantLookupService}), which today is an in-process call but will
  * become an inter-service RPC in the future.
  *
  * <p>The inbox insert and all per-target {@code webhook_event} inserts run in
@@ -44,7 +44,7 @@ public class WebhookIngestionService {
 
     private final WebhookEventRepository webhookEventRepository;
     private final InboxEventRepository inboxEventRepository;
-    private final MerchantWebhookApi merchantWebhookApi;
+    private final MerchantLookupService merchantWebhookApi;
     private final ObjectMapper objectMapper;
     private final SignerUtil signerUtil;
 
